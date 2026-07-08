@@ -1,8 +1,10 @@
-from app.schemas.dataset import DatasetStatus, DatasetResultsResponse, SummaryStats
+from app.schemas.dataset import DatasetStatus
+from processing.pipeline import process_dataset
 
 import time
 from threading import Thread
 import os
+from pathlib import Path
 
 def process_dataset_async(dataset_id, repo):
     thread = Thread(target=_process_dataset, args=(dataset_id, repo))
@@ -10,24 +12,23 @@ def process_dataset_async(dataset_id, repo):
 
 
 def _process_dataset(dataset_id, repo):
-    # 1. cambiar a processing
+    
+    # Cambio de estado y procesamiento del input
     repo.update_status(dataset_id, DatasetStatus.processing)
 
-    # 2. simular trabajo pesado
-    time.sleep(5)
+    dataset = repo.get(dataset_id)
 
-    # Creamos un fichero fake
-    file_path = f"cleaned_{dataset_id}.csv"
-    with open(file_path, "w") as f:
-        f.write("col1,col2\n1,2\n3,4\n")
 
-    repo.save_cleaned_file_path(dataset_id, file_path)
-    
-    # 3. Insertamos resultados simulados
-    results = DatasetResultsResponse(
-        summary=SummaryStats(row_count=100, column_count=10)
+    #input_path = Path(dataset["input_path"]) # La API no sube archivos reales por el momento
+    input_path = Path("data/sample.csv") 
+    output_dir = Path("outputs") / str(dataset_id)
+
+    result = process_dataset(
+        input_path=input_path,
+        output_directory=output_dir,
     )
-    repo.save_results(dataset_id, results)
 
-    # 4. terminar
+    # Guardamos los resultados
+    repo.save_cleaned_file_path(dataset_id, result.cleaned_dataset_path)
+    repo.save_results(dataset_id, result.metrics)
     repo.update_status(dataset_id, "done")
