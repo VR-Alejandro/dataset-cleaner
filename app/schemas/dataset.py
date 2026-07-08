@@ -10,7 +10,7 @@ class DatasetStatus(str, Enum):
     uploaded = "uploaded"
     processing = "processing"
     done = "done"
-    error = "error"
+    failed = "failed"
 
 
 class DatasetCreateResponse(BaseModel):

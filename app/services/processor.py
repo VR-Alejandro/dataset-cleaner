@@ -22,12 +22,17 @@ def _process_dataset(dataset_id, repo):
     input_path = Path(dataset["input_path"]) 
     output_dir = Path("outputs") / str(dataset_id)
 
-    result = process_dataset(
-        input_path=input_path,
-        output_directory=output_dir,
-    )
+    try:
+        result = process_dataset(
+            input_path=input_path,
+            output_directory=output_dir,
+        )
 
-    # Guardamos los resultados
-    repo.save_cleaned_file_path(dataset_id, result.cleaned_dataset_path)
-    repo.save_results(dataset_id, result.metrics)
-    repo.update_status(dataset_id, "done")
+        # Guardamos los resultados
+        repo.save_cleaned_file_path(dataset_id, result.cleaned_dataset_path)
+        repo.save_results(dataset_id, result.metrics)
+        repo.update_status(dataset_id, "done")
+    
+    except Exception as e:
+        repo.update_status(dataset_id, "failed")
+        repo.save_error(dataset_id, str(e))

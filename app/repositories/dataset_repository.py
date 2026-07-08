@@ -12,7 +12,8 @@ class DatasetRepository:
             "input_path": input_path,
             "created_at": datetime.now(),
             "results": None,
-            "cleaned_file_path": None
+            "cleaned_file_path": None,
+            "error": None
         }
         self._datasets[dataset_id] = dataset
         return dataset
@@ -33,3 +34,6 @@ class DatasetRepository:
     def save_cleaned_file_path(self, dataset_id: UUID, file_path: str):
         if dataset_id in self._datasets:
             self._datasets[dataset_id]["cleaned_file_path"] = file_path
+    
+    def save_error(self, dataset_id: UUID, error_message: str):
+        self._datasets[dataset_id]["error"] = error_message
