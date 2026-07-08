@@ -1,7 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from app.api.routes import router
+
+from processing.exceptions import (
+    ValidationError,
+    DatasetLoadError,
+    ProcessingError,
+    CleaningError,
+    StatisticsError,
+    CleanedDatasetGenerationError,
+    ReportGenerationError
+)
+
 import logging
 from pathlib import Path
+
 
 # Configuración del logging
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,5 +32,57 @@ logging.basicConfig(
     ]
 )
 
+
 app = FastAPI()
 app.include_router(router)
+
+
+# Mapeo de excepciones a códigos HTTP
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request: Request, exc: ValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(DatasetLoadError)
+async def load_exception_handler(request: Request, exc: DatasetLoadError):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(ProcessingError)
+async def processing_exception_handler(request: Request, exc: ProcessingError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(CleaningError)
+async def cleaning_exception_handler(request: Request, exc: CleaningError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(StatisticsError)
+async def statistics_exception_handler(request: Request, exc: StatisticsError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(CleanedDatasetGenerationError)
+async def cleaned_dataset_generation_exception_handler(request: Request, exc: CleanedDatasetGenerationError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc)},
+    )
+
+@app.exception_handler(ReportGenerationError)
+async def report_generation_exception_handler(request: Request, exc: ReportGenerationError):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": str(exc)},
+    )

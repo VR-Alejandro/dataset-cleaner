@@ -1,10 +1,14 @@
 import logging
+from processing.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 def validate_dataset(df):
 
     logger.info("Validando dataset...")
+
+    if df.empty:
+        raise ValidationError("Dataset is empty.")
 
     report = {}
 

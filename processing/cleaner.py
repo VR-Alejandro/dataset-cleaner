@@ -1,5 +1,6 @@
 import pandas as pd
 import logging
+from processing.exceptions import CleaningError
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +32,13 @@ def clean_dataset(df, config):
 
     # Validación de estrategias
     if numeric_strategy not in VALID_NUMERIC_STRATEGIES:
-        raise ValueError(
+        raise CleaningError(
             f"Estrategia numérica no válida: '{numeric_strategy}'. "
             f"Opciones permitidas: {sorted(VALID_NUMERIC_STRATEGIES)}"
         )
 
     if categorical_strategy not in VALID_CATEGORICAL_STRATEGIES:
-        raise ValueError(
+        raise CleaningError(
             f"Estrategia categórica no válida: '{categorical_strategy}'. "
             f"Opciones permitidas: {sorted(VALID_CATEGORICAL_STRATEGIES)}"
         )
