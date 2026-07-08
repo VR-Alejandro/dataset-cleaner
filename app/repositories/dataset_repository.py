@@ -5,10 +5,11 @@ class DatasetRepository:
     def __init__(self):
         self._datasets = {}
 
-    def create(self, dataset_id: UUID):
+    def create(self, dataset_id: UUID, input_path: str = None):
         dataset = {
             "id": dataset_id,
             "status": "uploaded",
+            "input_path": input_path,
             "created_at": datetime.now(),
             "results": None,
             "cleaned_file_path": None

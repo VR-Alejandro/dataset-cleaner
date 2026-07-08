@@ -19,8 +19,7 @@ def _process_dataset(dataset_id, repo):
     dataset = repo.get(dataset_id)
 
 
-    #input_path = Path(dataset["input_path"]) # La API no sube archivos reales por el momento
-    input_path = Path("data/sample.csv") 
+    input_path = Path(dataset["input_path"]) 
     output_dir = Path("outputs") / str(dataset_id)
 
     result = process_dataset(
