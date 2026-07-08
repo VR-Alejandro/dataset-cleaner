@@ -1,4 +1,7 @@
 import pandas as pd
+import logging
+
+logger = logging.getLogger(__name__)
 
 VALID_NUMERIC_STRATEGIES = {"keep", "drop", "mean"}
 VALID_CATEGORICAL_STRATEGIES = {"keep", "drop", "mode"}
@@ -6,7 +9,7 @@ VALID_CATEGORICAL_STRATEGIES = {"keep", "drop", "mode"}
 
 def clean_dataset(df, config):
 
-    print("Limpiando dataset...")
+    logger.info("Limpiando dataset...")
 
     df_clean = df.copy()
 
@@ -15,7 +18,7 @@ def clean_dataset(df, config):
     df_clean = df_clean.drop_duplicates()
     after_dup = df_clean.shape[0]
 
-    print(f"Duplicados eliminados: {before_dup - after_dup}")
+    logger.info(f"Duplicados eliminados: {before_dup - after_dup}")
 
     # Tratamiento de nulos
     before_nulls = df_clean.isnull().sum().sum()
@@ -61,9 +64,9 @@ def clean_dataset(df, config):
     # Resultado
     after_nulls = df_clean.isnull().sum().sum()
 
-    print(f"Nulos antes: {before_nulls}")
-    print(f"Nulos después: {after_nulls}")
-    print(f"Estrategia numérica: {numeric_strategy}")
-    print(f"Estrategia categórica: {categorical_strategy}")
+    logger.info(f"Nulos antes: {before_nulls}")
+    logger.info(f"Nulos después: {after_nulls}")
+    logger.info(f"Estrategia numérica: {numeric_strategy}")
+    logger.info(f"Estrategia categórica: {categorical_strategy}")
 
     return df_clean

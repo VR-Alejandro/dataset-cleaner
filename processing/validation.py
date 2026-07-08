@@ -1,6 +1,10 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def validate_dataset(df):
 
-    print("Validando dataset...")
+    logger.info("Validando dataset...")
 
     report = {}
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, status
 from fastapi.responses import FileResponse
 from app.schemas.dataset import DatasetCreateResponse, DatasetResponse, DatasetStatus
 
@@ -30,7 +30,10 @@ def create_dataset(file: UploadFile = File(...)):
 
     file_extension = file.filename.split(".")[-1]
     if file_extension not in allowed_extensions:
-        raise HTTPException(status_code=400, detail="Fichero no soportado. Utiliza un archivo CSV o XLSX.")
+        raise HTTPException(
+            status_code=400,
+            detail="Fichero no soportado. Utiliza un archivo CSV o XLSX."
+        )
     
 
     dataset_id = uuid4()
@@ -61,7 +64,15 @@ def create_dataset(file: UploadFile = File(...)):
 def get_dataset(id: UUID):
     dataset = repo.get(id)
     if not dataset:
-        raise HTTPException(status_code=404, detail="No se ha encontrado ningún dataset con el ID proporcionado.")
+        raise HTTPException(status_code=404, 
+                            detail="No se ha encontrado ningún dataset con el ID proporcionado."
+                        )
+    
+    if dataset["status"] == DatasetStatus.failed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Dataset is corrupted"
+        )
     
     return dataset
 
@@ -71,10 +82,14 @@ def get_dataset_results(id: UUID):
     dataset = repo.get(id)
 
     if not dataset:
-        raise HTTPException(status_code=404, detail="No se ha encontrado ningún dataset con el ID proporcionado.")
+        raise HTTPException(status_code=404, 
+                            detail="No se ha encontrado ningún dataset con el ID proporcionado."
+                        )
     
     if dataset["status"] != DatasetStatus.done:
-        raise HTTPException(status_code=400, detail="El dataset aún no ha terminado de procesarse. Por favor, inténtelo más tarde.")
+        raise HTTPException(status_code=400, 
+                            detail="El dataset aún no ha terminado de procesarse. Por favor, inténtelo más tarde."
+                        )
     
     return dataset["results"]
 
@@ -84,12 +99,18 @@ def get_dataset_cleaned(id: UUID):
     dataset = repo.get(id)
 
     if not dataset:
-        raise HTTPException(status_code=404, detail="No se ha encontrado ningún dataset con el ID proporcionado.")
+        raise HTTPException(status_code=404, 
+                            detail="No se ha encontrado ningún dataset con el ID proporcionado."
+                        )
     
     if dataset["status"] != DatasetStatus.done:
-        raise HTTPException(status_code=400, detail="El dataset aún no ha terminado de procesarse. Por favor, inténtelo más tarde.")
+        raise HTTPException(status_code=400, 
+                            detail="El dataset aún no ha terminado de procesarse. Por favor, inténtelo más tarde."
+                        )
 
     if not dataset["cleaned_file_path"]:
-        raise HTTPException(status_code=404, detail="No se ha encontrado ningún archivo limpio para el dataset con el ID proporcionado.")
+        raise HTTPException(status_code=404, 
+                            detail="No se ha encontrado ningún archivo limpio para el dataset con el ID proporcionado."
+                        )
 
     return FileResponse(path=dataset["cleaned_file_path"], filename=f"cleaned_{id}.csv")
