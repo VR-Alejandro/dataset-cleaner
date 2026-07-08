@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from app.schemas.dataset import DatasetCreateResponse, DatasetResponse, DatasetStatus
 
@@ -7,10 +7,14 @@ from app.services.processor import process_dataset_async
 
 from uuid import uuid4, UUID
 from datetime import datetime
+from pathlib import Path
+import shutil
 
 repo = DatasetRepository()
 
 router = APIRouter()
+
+DATA_DIR = Path("data/raw")
 
 
 @router.get("/")
@@ -18,15 +22,38 @@ def read_root():
     return {"Hello": "World"}
 
 
-@router.post("/datasets", response_model=DatasetCreateResponse)
-def create_dataset():
-    dataset_id = uuid4()
-    dataset = repo.create(dataset_id)
+@router.post("/datasets")
+def create_dataset(file: UploadFile = File(...)):
+    
+    # Validación del tipo de archivo
+    allowed_extensions = {"csv", "xlsx"}
 
-    # Lanzamos el procesamiento async
+    file_extension = file.filename.split(".")[-1]
+    if file_extension not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Fichero no soportado. Utiliza un archivo CSV o XLSX.")
+    
+
+    dataset_id = uuid4()
+    
+    # Construcción de la ruta destino
+    dataset_dir = DATA_DIR / str(dataset_id)
+    dataset_dir.mkdir(parents=True, exist_ok=True)
+    file_path = dataset_dir / f"input.{file_extension}"
+
+    # Creación del directorio (si no existe)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Guardado del input en crudo
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    # Guardado en repo
+    repo.create(dataset_id, input_path=str(file_path))
+
+    # Lanzamos el worker
     process_dataset_async(dataset_id, repo)
 
-    return dataset
+    return {"id": str(dataset_id)}
 
 
 
