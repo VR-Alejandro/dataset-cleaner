@@ -22,8 +22,10 @@ def save_report(
         Ruta completa del fichero generado.
     """
     
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    target_dir = Path(output_path)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = target_dir / "report.json"
 
     with open(output_path, "w") as f:
         json.dump(report, f, indent=4)
