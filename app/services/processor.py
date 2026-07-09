@@ -19,8 +19,7 @@ def _process_dataset(dataset_id, repo):
 
     dataset = repo.get(dataset_id)
 
-
-    input_path = Path(dataset["input_path"]) 
+    input_path = Path(dataset.input_path) 
     output_dir = Path("outputs") / str(dataset_id)
 
     try:
@@ -30,21 +29,24 @@ def _process_dataset(dataset_id, repo):
         )
 
         # Guardamos los resultados
-        repo.save_cleaned_file_path(dataset_id, result.cleaned_dataset_path)
-        repo.save_results(dataset_id, result.metrics)
-        repo.update_status(dataset_id, "done")
+        repo.save_results(
+            dataset_id,
+            cleaned_path=result.cleaned_dataset_path,
+            report_path=result.report_path
+        )
+        repo.update_status(dataset_id, DatasetStatus.done)
     
     except ProcessingError as e:
-        repo.update_status(dataset_id, "failed")
-        repo.save_error(dataset_id, {
-            "type": e.__class__.__name__,
-            "message": str(e)
-        })
+        repo.update_status(dataset_id, DatasetStatus.failed)
+        repo.save_error(dataset_id, 
+                        e.__class__.__name__,
+                        str(e)
+                    )
 
     except Exception as e:
         # Cualquier otro error inesperado 
-        repo.update_status(dataset_id, "failed")
-        repo.save_error(dataset_id, {
-            "type": e.__class__.__name__,
-            "message": str(e)
-        })
+        repo.update_status(dataset_id, DatasetStatus.failed)
+        repo.save_error(dataset_id, 
+                        e.__class__.__name__,
+                        str(e)
+                    )

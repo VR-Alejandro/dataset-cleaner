@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
 from app.api.routes import router
+from app.core.db import init_db
+
 
 from processing.exceptions import (
     ValidationError,
@@ -33,7 +36,14 @@ logging.basicConfig(
 )
 
 
-app = FastAPI()
+# Inicialización de la BBDD
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.include_router(router)
 
 
