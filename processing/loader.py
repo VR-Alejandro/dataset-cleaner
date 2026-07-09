@@ -5,7 +5,7 @@ from processing.exceptions import DatasetLoadError
 def load_dataset(path: str):
 
     if not os.path.exists(path):
-        raise FileNotFoundError(f"No se encuentra el archivo: {path}")
+        raise FileNotFoundError(f"File not found: {path}")
 
     extension = os.path.splitext(path)[1].lower()
 
@@ -19,7 +19,7 @@ def load_dataset(path: str):
 
         else:
             raise ValueError(
-                f"Formato '{extension}' no soportado. Usa CSV o Excel."
+                f"Unsupported format '{extension}'. Please use CSV or Excel."
             )
 
         # Intentar convertir automáticamente columnas numéricas

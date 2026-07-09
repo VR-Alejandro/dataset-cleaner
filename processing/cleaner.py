@@ -10,7 +10,7 @@ VALID_CATEGORICAL_STRATEGIES = {"keep", "drop", "mode"}
 
 def clean_dataset(df, config):
 
-    logger.info("Limpiando dataset...")
+    logger.info("Cleaning dataset...")
 
     df_clean = df.copy()
 
@@ -19,7 +19,7 @@ def clean_dataset(df, config):
     df_clean = df_clean.drop_duplicates()
     after_dup = df_clean.shape[0]
 
-    logger.info(f"Duplicados eliminados: {before_dup - after_dup}")
+    logger.info(f"Duplicates removed: {before_dup - after_dup}")
 
     # Tratamiento de nulos
     before_nulls = df_clean.isnull().sum().sum()
@@ -33,14 +33,14 @@ def clean_dataset(df, config):
     # Validación de estrategias
     if numeric_strategy not in VALID_NUMERIC_STRATEGIES:
         raise CleaningError(
-            f"Estrategia numérica no válida: '{numeric_strategy}'. "
-            f"Opciones permitidas: {sorted(VALID_NUMERIC_STRATEGIES)}"
+            f"Invalid numeric strategy: '{numeric_strategy}'. "
+            f"Available options: {sorted(VALID_NUMERIC_STRATEGIES)}"
         )
 
     if categorical_strategy not in VALID_CATEGORICAL_STRATEGIES:
         raise CleaningError(
-            f"Estrategia categórica no válida: '{categorical_strategy}'. "
-            f"Opciones permitidas: {sorted(VALID_CATEGORICAL_STRATEGIES)}"
+            f"Invalid categorical strategy: '{categorical_strategy}'. "
+            f"Available options: {sorted(VALID_CATEGORICAL_STRATEGIES)}"
         )
 
     # Columnas numéricas
@@ -65,9 +65,9 @@ def clean_dataset(df, config):
     # Resultado
     after_nulls = df_clean.isnull().sum().sum()
 
-    logger.info(f"Nulos antes: {before_nulls}")
-    logger.info(f"Nulos después: {after_nulls}")
-    logger.info(f"Estrategia numérica: {numeric_strategy}")
-    logger.info(f"Estrategia categórica: {categorical_strategy}")
+    logger.info(f"Missing values before: {before_nulls}")
+    logger.info(f"Missing values after: {after_nulls}")
+    logger.info(f"Numeric strategy: {numeric_strategy}")
+    logger.info(f"Categorical strategy: {categorical_strategy}")
 
     return df_clean

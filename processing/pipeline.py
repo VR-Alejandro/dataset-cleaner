@@ -30,18 +30,18 @@ def process_dataset(
     config: dict[str, str] | None = None,
 ) -> ProcessingResult:
     """
-    Ejecuta la pipeline completa de procesamiento de un dataset.
+    Runs the complete dataset processing pipeline.
 
     Parameters
     ----------
     input_path
-        Ruta al fichero de entrada (CSV o Excel).
+        Path to the input file (CSV or Excel).
 
     output_directory
-        Directorio donde se guardarán los resultados.
+        Directory where the output files will be saved.
 
     config
-        Configuración opcional de limpieza.
+        Optional cleaning configuration.
     """
 
     if config is None:

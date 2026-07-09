@@ -8,20 +8,20 @@ def save_csv(
     output_directory: Path,
 ) -> Path:
     """
-    Guarda el dataset limpio en formato CSV.
+    Saves the cleaned dataset as a CSV file.
 
     Parameters
     ----------
     df
-        Dataset limpio.
+        Cleaned dataset.
 
     output_directory
-        Directorio donde guardar el CSV.
+        Directory where the CSV file will be saved.
 
     Returns
     -------
     Path
-        Ruta completa del fichero generado.
+        Full path to the generated file.
     """
 
     try:
