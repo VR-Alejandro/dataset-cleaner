@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 def validate_dataset(df):
 
-    logger.info("Validando dataset...")
+    logger.info("Validating dataset...")
 
     if df.empty:
         raise ValidationError("Dataset is empty.")

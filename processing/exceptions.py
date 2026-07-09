@@ -1,5 +1,5 @@
 class ProcessingError(Exception):
-    """Error base de la pipeline de procesamiento"""
+    """An error ocurred in the processing pipeline"""
     pass
 
 class DatasetLoadError(ProcessingError):

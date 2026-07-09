@@ -7,20 +7,20 @@ def save_report(
     output_path: str
 ) -> Path:
     """
-    Guarda el informe de validación en formato JSON.
+    Saves the validation report as a JSON file.
 
     Parameters
     ----------
     report
-        Informe de validación.
+        Validation report.
 
     output_path
-        Ruta donde guardar el informe.
+        Directory where the report will be saved.
 
     Returns
     -------
     Path
-        Ruta completa del fichero generado.
+        Full path to the generated file.
     """
     
     try:
