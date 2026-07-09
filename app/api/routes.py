@@ -59,6 +59,20 @@ def create_dataset(file: UploadFile = File(...)):
     return {"id": str(dataset_id)}
 
 
+@router.get("/datasets")
+def list_datasets(limit: int = 50, offset: int = 0):
+    datasets = repo.list(limit=limit, offset=offset)
+
+    return [
+        DatasetResponse(
+            id=d.id,
+            status=d.status,
+            created_at=d.created_at,
+        )
+        for d in datasets
+    ]
+
+
 
 @router.get("/datasets/{id}", response_model=DatasetResponse)
 def get_dataset(id: UUID):

@@ -3,6 +3,7 @@ from app.domain.dataset import Dataset
 from app.core.db import get_connection
 from uuid import UUID
 from datetime import datetime
+from pathlib import Path
 
 
 class DatasetRepository:
@@ -26,6 +27,7 @@ class DatasetRepository:
 
     def get(self, dataset_id: UUID) -> Dataset:
         conn = get_connection()
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         cursor.execute(
             "SELECT * FROM datasets WHERE id = ?",
@@ -34,16 +36,7 @@ class DatasetRepository:
         row = cursor.fetchone()
         conn.close()
 
-        return Dataset(
-            id=row[0],
-            status=row[1],
-            input_path=row[2],
-            cleaned_path=row[3],
-            report_path=row[4],
-            created_at=row[5],
-            error_type=row[6],
-            error_message=row[7],
-        )
+        return self._map_row_to_dataset(row)
     
     def update_status(self, dataset_id: UUID, status: str):
         conn = get_connection()
@@ -86,3 +79,33 @@ class DatasetRepository:
         )
         conn.commit()
         conn.close()
+
+    def _map_row_to_dataset(self, row) -> Dataset:
+        """Función auxiliar para mapear una fila de la base de datos a un objeto Dataset."""
+        return Dataset(
+            id=row["id"],
+            status=row["status"],
+            input_path=Path(row["input_path"]) if row["input_path"] else None,
+            cleaned_path=Path(row["cleaned_path"]) if row["cleaned_path"] else None,
+            report_path=Path(row["report_path"]) if row["report_path"] else None,
+            created_at=datetime.fromisoformat(row["created_at"]) if row["created_at"] else None,
+            error_type=row["error_type"],
+            error_message=row["error_message"],
+        )
+    
+    def list(self, limit: int = 50, offset: int = 0):
+        conn = get_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT * FROM datasets
+            ORDER BY created_at DESC
+            LIMIT ? OFFSET ?
+            """,
+            (limit, offset)
+        )
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._map_row_to_dataset(row) for row in rows]
