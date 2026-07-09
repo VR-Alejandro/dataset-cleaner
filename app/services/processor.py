@@ -1,5 +1,6 @@
 from app.schemas.dataset import DatasetStatus
 from processing.pipeline import process_dataset
+from processing.exceptions import ProcessingError
 
 import time
 from threading import Thread
@@ -33,6 +34,17 @@ def _process_dataset(dataset_id, repo):
         repo.save_results(dataset_id, result.metrics)
         repo.update_status(dataset_id, "done")
     
-    except Exception as e:
+    except ProcessingError as e:
         repo.update_status(dataset_id, "failed")
-        repo.save_error(dataset_id, str(e))
+        repo.save_error(dataset_id, {
+            "type": e.__class__.__name__,
+            "message": str(e)
+        })
+
+    except Exception as e:
+        # Cualquier otro error inesperado 
+        repo.update_status(dataset_id, "failed")
+        repo.save_error(dataset_id, {
+            "type": e.__class__.__name__,
+            "message": str(e)
+        })

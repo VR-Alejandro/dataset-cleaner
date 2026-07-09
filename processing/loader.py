@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from processing.exceptions import DatasetLoadError
 
 def load_dataset(path: str):
 
@@ -37,8 +38,8 @@ def load_dataset(path: str):
             except (ValueError, TypeError):
                 pass
 
-    except Exception as e:
-        raise Exception(f"Error leyendo el archivo: {e}")
+    except DatasetLoadError as e:
+        raise DatasetLoadError(f"Error loading dataset: {e}.")
 
     return df
 
