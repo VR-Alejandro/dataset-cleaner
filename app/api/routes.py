@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Response, status
 from fastapi.responses import FileResponse
-from app.schemas.dataset import DatasetCreateResponse, DatasetResponse, DatasetStatus
+from app.schemas.dataset import DatasetResponse, DatasetStatus
 
 from app.repositories.dataset_repository import DatasetRepository
 from app.services.processor import process_dataset_async
 
 from uuid import uuid4, UUID
-from datetime import datetime
 from pathlib import Path
 import shutil
+import json
 
 repo = DatasetRepository()
 
@@ -152,3 +152,46 @@ def get_dataset_cleaned(id: UUID):
         )
 
     return FileResponse(path=dataset.cleaned_path, filename=f"cleaned_{id}.csv")
+
+
+@router.get("/datasets/{dataset_id}/download")
+def download_cleaned(dataset_id: str):
+    dataset = repo.get(dataset_id)
+
+    if dataset.status != DatasetStatus.done:
+        raise HTTPException(
+            status_code=400, 
+            detail="Dataset is not ready for download"
+        )
+    
+    if not dataset.cleaned_path:
+        raise HTTPException(
+            status_code=404, 
+            detail="Cleaned file not available"
+        )
+
+    return FileResponse(
+        path=str(dataset.cleaned_path),
+        filename="cleaned.csv",
+        media_type="text/csv"
+    )
+
+
+@router.get("/datasets/{dataset_id}/report")
+def get_report(dataset_id: str):
+    dataset = repo.get(dataset_id)
+
+    if dataset.status != DatasetStatus.done:
+        raise HTTPException(
+            status_code=400, 
+            detail="Report is not ready for download"
+        )
+    
+    if not dataset.report_path:
+        raise HTTPException(
+            status_code=404, 
+            detail="Report not available"
+        )
+
+    with open(dataset.report_path) as f:
+        return json.load(f)
