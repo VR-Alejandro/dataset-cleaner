@@ -120,16 +120,16 @@ async function loadDatasets() {
 
         const container = document.getElementById("datasetList");
 
-        // 🌟 CONTROL DE ESTADO VACÍO (Si la API devuelve un array sin elementos)
+        // Si la API devuelve un array sin elementos...
         if (!data || data.length === 0) {
-            // 1. Ocultamos el botón "Delete All" porque no hay nada que borrar
+            // Ocultamos el botón "Delete All"; no hay nada que borrar
             if (deleteAllBtn) deleteAllBtn.style.display = "none";
 
-            // 2. Ocultamos o limpiamos la paginación si el contenedor de paginación existe
-            const paginationContainer = document.getElementById("paginationContainer"); // Ajusta el ID según tu HTML
+            // Limpiamos la paginación si el contenedor de paginación existe
+            const paginationContainer = document.getElementById("paginationContainer");
             if (paginationContainer) paginationContainer.innerHTML = "";
 
-            // 3. Inyectamos el muñeco durmiendo con su animación en el listado
+            // Mensaje al usuario para sugerir la interacción
             container.innerHTML = `
                 <div class="empty-state-wrapper">
                     <div class="empty-state-icon">😴</div>
@@ -137,13 +137,13 @@ async function loadDatasets() {
                     <p class="text-muted small mb-0">Your workspace is empty. Drop a file above to start processing!</p>
                 </div>
             `;
-            return; // Cortamos la ejecución aquí
+            return;
         }
 
-        // 🌟 ESTADO CON DATOS (Si hay elementos en el array)
+        // Si la API devuelve un array con elementos...
         if (deleteAllBtn) deleteAllBtn.style.display = "block"; // Mostramos el botón "Delete All"
 
-        // Ejecutamos tus funciones originales de renderizado
+        // Funciones de renderizado
         renderPagination(data.length);
         renderPagedDatasets(data);
 
@@ -182,14 +182,14 @@ function renderPagedDatasets(allDatasets) {
 
     container.style.paddingTop = "20px";
 
-    // 1. Eliminar del DOM solo las tarjetas que cambiaron de página
+    // Eliminar del DOM solo las tarjetas que cambiaron de página
     Array.from(container.children).forEach(child => {
         if (!visibleIds.has(child.id)) {
             container.removeChild(child);
         }
     });
 
-    // 2. Reconciliación e inyección
+    // Reconciliación e inyección
     pagedData.forEach(dataset => {
         const cardId = `card-${dataset.id}`;
         let card = document.getElementById(cardId);
@@ -204,14 +204,12 @@ function renderPagedDatasets(allDatasets) {
             needsAnimation = isNewUpload;
         }
 
-        // 1. Insertamos primero la tarjeta en el contenedor
+        // Insertamos primero la tarjeta en el contenedor
         container.appendChild(card);
 
-        // 2. 🌟 ANIMACIÓN CON GARANTÍA DE RENDERIZADO
         if (needsAnimation) {
             const bar = card.querySelector('.progress-bar');
             
-            // Un doble frame asegura que el navegador asimile el estado 0% en el DOM
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (dataset.status === "processing") {
@@ -338,15 +336,15 @@ async function deleteAllDatasets(e) {
         
         deleteAllBtn.classList.add('success');
         
-        // Esperamos 2 segundos para que el usuario disfrute del check verde animado
+        // Botón de eliminado masivo
         setTimeout(() => {
-            // Quitamos la animación para futuros usos
-            deleteAllBtn.classList.remove('success');
-            
             // Reiniciamos a la página 1 y recargamos la interfaz
             currentPage = 1;
             knownIds.clear(); // Limpiamos la caché de IDs animados
             loadDatasets();
+
+            // Eliminamos la flag de éxito para "reiniciar" el estado
+            deleteAllBtn.classList.remove('success');
         }, 500);
         
     } catch (err) {

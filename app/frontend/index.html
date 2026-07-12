@@ -385,7 +385,7 @@
         }
 
         /* ========================================================
-           ESTADO VACÍO (EMPTY STATE)
+           EMPTY STATE
            ======================================================== */
         
         .empty-state-wrapper {
@@ -403,7 +403,6 @@
             overflow: clip !important;
         }
 
-        /* El "muñeco" o ilustración en CSS */
         .empty-state-icon {
             font-size: 4rem;
             margin-bottom: 15px;
@@ -412,7 +411,6 @@
             animation: floatingSleep 4s ease-in-out infinite;
         }
 
-        /* Efecto de las letras 'Z' flotando y desvaneciéndose */
         .empty-state-icon::after {
             content: 'z Z';
             position: absolute;
@@ -441,11 +439,11 @@
         }
 
         /* ========================================================
-           BOTÓN ELIMINAR INTERACTIVO ANIMADO
+           BOTÓN DELETE ALL
            ======================================================== */
         .delete-animate-btn {
             display: block;
-            background-color: #ca5346; /* Rojo base */
+            background-color: #ca5346;
             width: 140px;
             height: 34px;
             line-height: 34px;
@@ -492,7 +490,7 @@
             right: 0;
         }
         
-        /* Contenedor del Icono */
+        /* Contenedor del icono */
         .delete-animate-btn .icon {
             width: 25%;
             right: 0;
@@ -516,7 +514,6 @@
             display: none;
         }
         
-        /* --- ESTADOS ANIMADOS (HOVER & SUCCESS) --- */
         .delete-animate-btn:hover {
             opacity: .95;
             box-shadow: 0 6px 15px rgba(192, 57, 43, 0.35);
