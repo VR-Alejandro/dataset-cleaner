@@ -25,6 +25,32 @@ class DatasetRepository:
         conn.commit()
         conn.close()
 
+    def delete(self, dataset_id: UUID):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM datasets
+            WHERE id = ?
+            """,
+            (str(dataset_id),)
+        )
+        conn.commit()
+        conn.close()
+
+    def delete_all(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(
+            """
+            DELETE FROM datasets
+            """
+        )
+        conn.commit()
+        conn.close()
+
     def get(self, dataset_id: UUID) -> Dataset:
         conn = get_connection()
         conn.row_factory = sqlite3.Row

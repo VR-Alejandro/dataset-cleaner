@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:8000";
 
 let currentPage = 1;
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 5;
 const knownIds = new Set();      // Guarda los IDs que ya existen
 const activePolls = new Set();   // Evita duplicar bucles de intervalos de escucha
 let isInitialLoad = true;        // Flag para el primer encendido de la app
@@ -10,15 +10,17 @@ let fileInput = document.getElementById("fileInput");
 const dropzone = document.getElementById("dropzone");
 const uploadBtn = document.getElementById("uploadBtn");
 const clearBtn = document.getElementById("clearBtn");
+const deleteAllBtn = document.getElementById("deleteAllBtn");
 
 // Función para enlazar los eventos del input de archivos
 function setupFileInputListeners() {
     fileInput.addEventListener("change", (e) => updateDropzoneText(e.target.files[0]));
 }
 
+dropzone.addEventListener("click", () => fileInput.click());
 uploadBtn.addEventListener("click", uploadFile);
 clearBtn.addEventListener("click", clearDropzone);
-dropzone.addEventListener("click", () => fileInput.click());
+deleteAllBtn.addEventListener("click", deleteAllDatasets);
 
 // Inicializar la primera escucha
 setupFileInputListeners();
@@ -113,11 +115,38 @@ async function uploadFile() {
 
 async function loadDatasets() {
     try {
-        const res = await fetch(`${API_URL}/datasets`);
+        const res = await fetch(`${API_URL}/datasets`, { cache: "no-store" });
         const data = await res.json();
 
+        const container = document.getElementById("datasetList");
+
+        // 🌟 CONTROL DE ESTADO VACÍO (Si la API devuelve un array sin elementos)
+        if (!data || data.length === 0) {
+            // 1. Ocultamos el botón "Delete All" porque no hay nada que borrar
+            if (deleteAllBtn) deleteAllBtn.style.display = "none";
+
+            // 2. Ocultamos o limpiamos la paginación si el contenedor de paginación existe
+            const paginationContainer = document.getElementById("paginationContainer"); // Ajusta el ID según tu HTML
+            if (paginationContainer) paginationContainer.innerHTML = "";
+
+            // 3. Inyectamos el muñeco durmiendo con su animación en el listado
+            container.innerHTML = `
+                <div class="empty-state-wrapper">
+                    <div class="empty-state-icon">😴</div>
+                    <h5 class="fw-bold text-secondary mb-1">No datasets found</h5>
+                    <p class="text-muted small mb-0">Your workspace is empty. Drop a file above to start processing!</p>
+                </div>
+            `;
+            return; // Cortamos la ejecución aquí
+        }
+
+        // 🌟 ESTADO CON DATOS (Si hay elementos en el array)
+        if (deleteAllBtn) deleteAllBtn.style.display = "block"; // Mostramos el botón "Delete All"
+
+        // Ejecutamos tus funciones originales de renderizado
         renderPagination(data.length);
         renderPagedDatasets(data);
+
     } catch (error) {
         console.error("Error loading datasets:", error);
     }
@@ -164,20 +193,27 @@ function renderPagedDatasets(allDatasets) {
     pagedData.forEach(dataset => {
         const cardId = `card-${dataset.id}`;
         let card = document.getElementById(cardId);
-
-        const isNewUpload = !knownIds.has(dataset.id) && !isInitialLoad;
+        
+        const isNewUpload = !knownIds.has(dataset.id) && dataset.status === "processing";
+        let needsAnimation = false;
 
         if (!card) {
             card = document.createElement("div");
             card.id = cardId;
+            card.innerHTML = renderDatasetCardTemplate(dataset, isNewUpload);
+            needsAnimation = isNewUpload;
+        }
+
+        // 1. Insertamos primero la tarjeta en el contenedor
+        container.appendChild(card);
+
+        // 2. 🌟 ANIMACIÓN CON GARANTÍA DE RENDERIZADO
+        if (needsAnimation) {
+            const bar = card.querySelector('.progress-bar');
             
-            if (isNewUpload) {
-                // Estado inicial de animación
-                card.innerHTML = renderDatasetCardTemplate(dataset, true);
-                
-                // Forzar el inicio de la transición fluida tras montarse en el DOM
-                setTimeout(() => {
-                    const bar = card.querySelector('.progress-bar');
+            // Un doble frame asegura que el navegador asimile el estado 0% en el DOM
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
                     if (dataset.status === "processing") {
                         bar.style.width = "50%";
                         setTimeout(() => {
@@ -187,17 +223,10 @@ function renderPagedDatasets(allDatasets) {
                         bar.style.width = "100%";
                         setTimeout(() => { finalizeCardUI(card, bar, dataset); }, 2000);
                     }
-                }, 50);
-            } else {
-                card.innerHTML = renderDatasetCardTemplate(dataset, false);
-            }
+                });
+            });
         }
 
-        // Garantizamos que los elementos sigan estrictamente el orden del array, 
-        // empujando el nuevo arriba.
-        container.appendChild(card);
-
-        // Activamos el polling frecuente si el estado actual es processing
         if (dataset.status === "processing") {
             startPolling(dataset.id);
         }
@@ -214,7 +243,7 @@ function startPolling(datasetId) {
 
     const interval = setInterval(async () => {
         try {
-            const res = await fetch(`${API_URL}/datasets/${datasetId}`);
+            const res = await fetch(`${API_URL}/datasets/${datasetId}`, { cache: "no-store" });
             const data = await res.json();
 
             if (data.status !== "processing") {
@@ -237,7 +266,12 @@ function advanceProgressBar(id, dataset) {
     const bar = card.querySelector('.progress-bar');
     if (!bar) return;
 
-    bar.className = "progress-bar progress-bar-anim";
+    if (bar.classList.contains('static-processing')) {
+        bar.classList.remove('static-processing');
+        bar.classList.add('progress-bar-anim', 'bar-processing');
+        bar.style.width = "50%"; // Aseguramos que empiece a animar desde la mitad
+    }
+
     bar.style.width = "100%";
 
     // Esperamos a que la transición de la barra de carga termine para 
@@ -257,6 +291,7 @@ function finalizeCardUI(card, bar, dataset) {
         finalText.style.display = 'inline';
         
         if (dataset.status === "done") {
+            bar.classList.remove('bar-processing');
             bar.classList.add('bar-done');
             finalText.innerText = "Dataset processed!";
             finalText.className = "text-final text-success";
@@ -267,6 +302,7 @@ function finalizeCardUI(card, bar, dataset) {
             card.classList.add('is-done');
 
         } else {
+            bar.classList.remove('bar-processing');
             bar.classList.add('bar-failed');
             finalText.innerText = dataset.error_message || "Failed to process dataset";
             finalText.className = "text-final text-danger";
@@ -287,6 +323,34 @@ async function deleteDataset(id) {
         loadDatasets();
     } catch (error) {
         alert(error.message);
+    }
+}
+
+async function deleteAllDatasets(e) {
+    if (e) e.preventDefault();
+
+    const confirmDelete = confirm("Are you absolutely sure you want to delete ALL listed datasets? This action cannot be undone.");
+    if (!confirmDelete) return;
+
+    try {
+        const res = await fetch(`${API_URL}/all_datasets`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to clear datasets workspace");
+        
+        deleteAllBtn.classList.add('success');
+        
+        // Esperamos 2 segundos para que el usuario disfrute del check verde animado
+        setTimeout(() => {
+            // Quitamos la animación para futuros usos
+            deleteAllBtn.classList.remove('success');
+            
+            // Reiniciamos a la página 1 y recargamos la interfaz
+            currentPage = 1;
+            knownIds.clear(); // Limpiamos la caché de IDs animados
+            loadDatasets();
+        }, 500);
+        
+    } catch (err) {
+        alert("Error: " + err.message);
     }
 }
 

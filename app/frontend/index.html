@@ -23,6 +23,7 @@
             gap: 4rem;
             box-sizing: border-box;
             background-color: #fbfbfb;
+            overflow-x: hidden !important;
         }
 
         /* Contenedor del sidebar */
@@ -223,6 +224,9 @@
             overflow-y: auto;
             overflow-x: hidden !important;
             padding-right: 0.5rem;
+            scrollbar-gutter: stable;
+            overflow-x: clip !important; 
+            max-width: 100%;
         }
 
         .mac-preview-box {
@@ -379,6 +383,193 @@
             box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.15) !important;
             transition: all 0.2s ease !important;
         }
+
+        /* ========================================================
+           ESTADO VACÍO (EMPTY STATE)
+           ======================================================== */
+        
+        .empty-state-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+            animation: fadeInState 0.4s ease forwards;
+            height: 100%;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box !important;
+            overflow: clip !important;
+        }
+
+        /* El "muñeco" o ilustración en CSS */
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+            animation: floatingSleep 4s ease-in-out infinite;
+        }
+
+        /* Efecto de las letras 'Z' flotando y desvaneciéndose */
+        .empty-state-icon::after {
+            content: 'z Z';
+            position: absolute;
+            top: -10px;
+            right: -20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #a1a1aa;
+            animation: sleepZs 2s linear infinite;
+        }
+
+        @keyframes fadeInState {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatingSleep {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        @keyframes sleepZs {
+            0% { opacity: 0; transform: translate(0, 5px) scale(0.6); }
+            50% { opacity: 0.8; transform: translate(5px, -10px) scale(1); }
+            100% { opacity: 0; transform: translate(12px, -25px) scale(0.8); }
+        }
+
+        /* ========================================================
+           BOTÓN ELIMINAR INTERACTIVO ANIMADO
+           ======================================================== */
+        .delete-animate-btn {
+            display: block;
+            background-color: #ca5346; /* Rojo base */
+            width: 140px;
+            height: 34px;
+            line-height: 34px;
+            color: #ffffff !important;
+            position: absolute;
+            cursor: pointer;
+            overflow: hidden;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(192, 57, 43, 0.2);
+            transition: all 0.25s cubic-bezier(0.310, -0.105, 0.430, 1.400);
+            text-decoration: none;
+            user-select: none;
+            z-index: 10;
+        }
+        
+        .delete-animate-btn span,
+        .delete-animate-btn .icon {
+            display: block;
+            height: 100%;
+            text-align: center;
+            position: absolute;
+            top: 0;
+        }
+        
+        /* Texto del botón */
+        .delete-animate-btn > span {
+            width: 75%;
+            line-height: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            left: 0;
+            transition: all 0.25s cubic-bezier(0.310, -0.105, 0.430, 1.400);
+        }
+        
+        /* Línea divisoria interna */
+        .delete-animate-btn > span::after {
+            content: '';
+            background-color: #a53125;
+            width: 1px;
+            height: 60%;
+            position: absolute;
+            top: 20%;
+            right: 0;
+        }
+        
+        /* Contenedor del Icono */
+        .delete-animate-btn .icon {
+            width: 25%;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.25s cubic-bezier(0.310, -0.105, 0.430, 1.400);
+        }
+
+        .delete-animate-btn .icon .icon-remove,
+        .delete-animate-btn .icon .icon-check {
+            position: relative;
+            display: inline-block;
+            height: auto;
+            width: auto;
+            transition: all 0.25s ease;
+        }
+        
+        .delete-animate-btn .icon .icon-check {
+            display: none;
+        }
+        
+        /* --- ESTADOS ANIMADOS (HOVER & SUCCESS) --- */
+        .delete-animate-btn:hover {
+            opacity: .95;
+            box-shadow: 0 6px 15px rgba(192, 57, 43, 0.35);
+        }
+
+        .delete-animate-btn.success,
+        .delete-animate-btn:hover {
+            padding: 0;
+        }
+
+        .delete-animate-btn.success > span,
+        .delete-animate-btn:hover > span {
+            left: -75%;
+            opacity: 0;
+        }
+        
+        .delete-animate-btn.success .icon,
+        .delete-animate-btn:hover .icon {
+            width: 100%;
+        }
+
+        .delete-animate-btn.success .icon {
+            font-size: 16px;
+        }
+
+        .delete-animate-btn:hover .icon .icon-remove {
+            transform: scale(1.2);
+        }
+        
+        /* Estado de éxito tras borrar */
+        .delete-animate-btn.success {
+            background-color: #27ae60; /* Verde éxito */
+            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+        }
+        
+        .delete-animate-btn.success .icon .icon-remove {
+            display: none;
+        }
+        
+        .delete-animate-btn.success .icon .icon-check {
+            display: inline-block;
+            animation: popCheck 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes popCheck {
+            0% { transform: scale(0.5); }
+            100% { transform: scale(1.1); }
+        }
+        
+        .delete-animate-btn:active {
+            opacity: 1;
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -418,7 +609,7 @@
         </div>
     </div>
 
-    <div class="main-content">
+    <div class="main-content position-relative">
         
         <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
             <h6 class="mb-0 text-secondary fw-bold text-uppercase tracking-wider" style="font-size: 0.85rem;">Uploaded datasets</h6>
@@ -427,6 +618,13 @@
 
         <div id="datasetList" class="dataset-list-scroll d-flex flex-column gap-3"></div>
 
+        <a id="deleteAllBtn" class="delete-animate-btn position-absolute" style="right: 2rem; bottom: 2rem;" role="button">
+            <span>Delete all</span>
+            <div class="icon">
+                <span class="icon-remove">❌</span>
+                <span class="icon-check">✔️</span>
+            </div>
+        </a>
     </div>
 
 </div>

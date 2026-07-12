@@ -59,6 +59,26 @@ def create_dataset(file: UploadFile = File(...)):
     return {"id": str(dataset_id)}
 
 
+@router.delete("/datasets/{id}")
+def delete_dataset(id: UUID):
+    dataset = repo.get(id)
+
+    if not dataset:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="No se ha encontrado ningún dataset con el ID proporcionado."
+        )
+    else:
+        # En este endpoint no nos interesa consultar el estado del dataset
+        # La eliminación debe estar disponible independientemente de si
+        # status = done, processing o failed.
+        repo.delete(id)
+
+@router.delete("/all_datasets")
+def delete_all_datasets():
+    repo.delete_all()
+
+
 @router.get("/datasets")
 def list_datasets(limit: int = 50, offset: int = 0):
     datasets = repo.list(limit=limit, offset=offset)
