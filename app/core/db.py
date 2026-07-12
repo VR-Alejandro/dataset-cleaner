@@ -17,6 +17,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS datasets (
         id TEXT PRIMARY KEY,
+        filename TEXT,
         status TEXT,
         input_path TEXT,
         cleaned_path TEXT,

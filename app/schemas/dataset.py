@@ -25,6 +25,7 @@ class DatasetResponse(BaseModel):
     """Modelo de respuesta para la obtención de un dataset en el sistema."""
 
     id: UUID
+    filename: str
     status: DatasetStatus
     created_at: datetime
 

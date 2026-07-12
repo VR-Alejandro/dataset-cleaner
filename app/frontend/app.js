@@ -392,6 +392,9 @@ function renderDatasetCardTemplate(dataset, isAnimating) {
             </div>
 
             <div class="flex-grow-1 px-md-3">
+                <div class="text-truncate fw-bold text-dark mb-1" style="font-size: 0.95rem; max-width: 250px;">
+                    ${dataset.filename || 'Untitled dataset'}
+                </div>
                 <div class="status-text-container fw-bold">
                     <span class="text-loading text-secondary" style="display: ${isAnimating || dataset.status === 'processing' ? 'inline' : 'none'};">
                         Processing<span class="ticker-dots"></span>

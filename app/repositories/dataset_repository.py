@@ -10,17 +10,17 @@ class DatasetRepository:
     def __init__(self):
         self._datasets = {}
 
-    def create(self, dataset_id: UUID, input_path: str = None):
+    def create(self, dataset_id: UUID, input_path: str = None, filename: str = None):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
             """
             INSERT INTO datasets (
-                id, status, input_path, created_at
+                id, filename, status, input_path, created_at
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (str(dataset_id), "uploaded", str(input_path), datetime.now())
+            (str(dataset_id), filename, "uploaded", str(input_path), datetime.now())
         )
         conn.commit()
         conn.close()
@@ -110,6 +110,7 @@ class DatasetRepository:
         """Función auxiliar para mapear una fila de la base de datos a un objeto Dataset."""
         return Dataset(
             id=row["id"],
+            filename=row["filename"],
             status=row["status"],
             input_path=Path(row["input_path"]) if row["input_path"] else None,
             cleaned_path=Path(row["cleaned_path"]) if row["cleaned_path"] else None,
