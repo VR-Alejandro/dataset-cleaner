@@ -40,5 +40,14 @@ def generate_statistics(df: pd.DataFrame):
                 "top_value": df[col].mode()[0] if not df[col].mode().empty else None,
                 "frequencies": df[col].value_counts().head(10).to_dict()
             }
+        
+    correlation = (
+        df.select_dtypes(include="number")
+            .corr()
+            .round(3)
+            .to_dict()
+    )
+
+    stats["correlation_matrix"] = correlation
 
     return stats
