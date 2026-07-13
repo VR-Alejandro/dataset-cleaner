@@ -21,6 +21,11 @@ def generate_statistics(df: pd.DataFrame):
                 "std": float(df[col].std()),
                 "min": float(df[col].min()),
                 "max": float(df[col].max()),
+                "quartiles": {
+                    "q1": float(df[col].quantile(0.25)),
+                    "q2": float(df[col].quantile(0.50)),
+                    "q3": float(df[col].quantile(0.75))
+                },
                 "histogram": {
                     "bins": hist_bins.tolist(),
                     "counts": hist_counts.tolist()
