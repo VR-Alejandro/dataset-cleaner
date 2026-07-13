@@ -25,7 +25,8 @@ def generate_statistics(df: pd.DataFrame):
 
             stats["categorical"][col] = {
                 "unique_values": int(df[col].nunique()),
-                "top_value": df[col].mode()[0] if not df[col].mode().empty else None
+                "top_value": df[col].mode()[0] if not df[col].mode().empty else None,
+                "frequencies": df[col].value_counts().head(10).to_dict()
             }
 
     return stats
