@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def generate_statistics(df: pd.DataFrame):
 
@@ -12,12 +13,18 @@ def generate_statistics(df: pd.DataFrame):
         # numéricas
         if pd.api.types.is_numeric_dtype(df[col]):
 
+            hist_counts, hist_bins = np.histogram(df[col].dropna(), bins=10)
+
             stats["numeric"][col] = {
                 "mean": float(df[col].mean()),
                 "median": float(df[col].median()),
                 "std": float(df[col].std()),
                 "min": float(df[col].min()),
-                "max": float(df[col].max())
+                "max": float(df[col].max()),
+                "histogram": {
+                    "bins": hist_bins.tolist(),
+                    "counts": hist_counts.tolist()
+                }
             }
 
         # categóricas
