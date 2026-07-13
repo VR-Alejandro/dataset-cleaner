@@ -6,6 +6,7 @@ from typing import Optional
 @dataclass
 class Dataset:
     id: str
+    filename: str
     status: str
     input_path: str
     cleaned_path: Optional[str]

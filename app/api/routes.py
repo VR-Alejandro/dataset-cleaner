@@ -51,7 +51,7 @@ def create_dataset(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     # Guardado en repo
-    repo.create(dataset_id, input_path=str(file_path))
+    repo.create(dataset_id, input_path=str(file_path), filename=file.filename)
 
     # Lanzamos el worker
     process_dataset_async(dataset_id, repo)
@@ -86,6 +86,7 @@ def list_datasets(limit: int = 50, offset: int = 0):
     return [
         DatasetResponse(
             id=d.id,
+            filename=d.filename,
             status=d.status,
             created_at=d.created_at,
         )
