@@ -4,7 +4,13 @@ from app.core.db import get_connection
 from uuid import UUID
 from datetime import datetime
 from pathlib import Path
+import shutil
+import logging
 
+logger = logging.getLogger(__name__)
+
+RAW_BASE = Path("data/raw")
+OUTPUTS_BASE = Path("outputs")
 
 class DatasetRepository:
     def __init__(self):
@@ -136,3 +142,34 @@ class DatasetRepository:
         conn.close()
 
         return [self._map_row_to_dataset(row) for row in rows]
+    
+    def cleanup_dataset_directories(self, dataset_id):
+        dataset_id = str(dataset_id)
+
+        dirs = [
+            RAW_BASE / dataset_id,
+            OUTPUTS_BASE / dataset_id
+        ]
+
+        for directory in dirs:
+            try:
+                dir_path = directory.resolve()
+                if dir_path.exists():
+                    shutil.rmtree(dir_path)
+                    logger.info(f"Directory {directory} deleted successfully.")
+
+            except Exception as e:
+                logger.error(f"Error deleting directory {directory}: {e}")
+    
+    def cleanup_all_artifacts(self):
+        for base_dir in [RAW_BASE, OUTPUTS_BASE]:
+            try:
+                for entry in base_dir.iterdir():
+                    try:
+                        if entry.is_dir():
+                            shutil.rmtree(entry)
+                            logger.info(f"Directory {entry} deleted successfully.")
+                    except Exception as e:
+                        logger.error(f"Error deleting {entry}: {e}")
+            except Exception as e:
+                logger.error(f"Error scanning {base_dir}: {e}")
