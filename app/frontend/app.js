@@ -24,6 +24,7 @@ deleteAllBtn.addEventListener("click", deleteAllDatasets);
 
 // Inicializar la primera escucha
 setupFileInputListeners();
+setupBinsRestrictions();
 
 // Control de arrastre visual simple
 dropzone.addEventListener("dragover", (e) => { e.preventDefault(); });
@@ -73,7 +74,9 @@ function clearDropzone() {
 loadDatasets();
 
 async function uploadFile() {
-    const nullStrategyInput = document.getElementById("nullStrategy");
+    const numNullInput = document.getElementById("numNullTreatment");
+    const catNullInput = document.getElementById("catNullTreatment");
+    const binsInput = document.getElementById("histogramBins");
     const file = fileInput.files[0];
 
     if (!file) {
@@ -81,9 +84,21 @@ async function uploadFile() {
         return;
     }
 
+    // Protección ante posibles selección de N grupos fuera de rango
+    let binsValue = parseInt(binsInput.value, 10);
+    if (isNaN(binsValue) || binsValue < 5) {
+        binsValue = 5;
+        binsInput.value = 5; // Mostramos 5 en el HTML
+    } else if (binsValue > 50) {
+        binsValue = 50;
+        binsInput.value = 50; // Mostramos 50 en el HTML
+    }
+
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("null_strategy", nullStrategyInput.value);
+    formData.append("numerical_missing", numNullInput.value);
+    formData.append("categorical_missing", catNullInput.value);
+    formData.append("histogram_bins", binsValue);
 
     try {
         const res = await fetch(`${API_URL}/datasets`, { method: "POST", body: formData });
@@ -425,4 +440,23 @@ function renderDatasetCardTemplate(dataset, isAnimating) {
         </div>
     </div>
     `;
+}
+
+function setupBinsRestrictions() {
+    const binsInput = document.getElementById("histogramBins");
+    
+    if (binsInput) {
+        binsInput.addEventListener("change", () => {
+            let value = parseInt(binsInput.value, 10);
+            
+            // Si no es un número válido o es menor que 5, forzamos el mínimo (5)
+            if (isNaN(value) || value < 5) {
+                binsInput.value = 5;
+            } 
+            // Si es mayor que 50, forzamos el máximo (50)
+            else if (value > 50) {
+                binsInput.value = 50;
+            }
+        });
+    }
 }

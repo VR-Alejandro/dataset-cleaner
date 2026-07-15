@@ -8,6 +8,9 @@ class Dataset:
     id: str
     filename: str
     status: str
+    numerical_missing: str
+    categorical_missing: str
+    histogram_bins: int
     input_path: str
     cleaned_path: Optional[str]
     report_path: Optional[str]

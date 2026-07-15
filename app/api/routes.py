@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Response, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Form, Response, status
 from fastapi.responses import FileResponse
 from app.schemas.dataset import DatasetResponse, DatasetStatus
 
@@ -23,7 +23,12 @@ def read_root():
 
 
 @router.post("/datasets")
-def create_dataset(file: UploadFile = File(...)):
+def create_dataset(
+    file: UploadFile = File(...),
+    numerical_missing: str = Form("drop"),       
+    categorical_missing: str = Form("drop"),
+    histogram_bins: int = Form(10)
+):
     
     # Validación del tipo de archivo
     allowed_extensions = {"csv", "xlsx"}
@@ -32,7 +37,7 @@ def create_dataset(file: UploadFile = File(...)):
     if file_extension not in allowed_extensions:
         raise HTTPException(
             status_code=400,
-            detail="Fichero no soportado. Utiliza un archivo CSV o XLSX."
+            detail="File not supported. Please use a CSV or XLSX file."
         )
     
 
@@ -51,7 +56,14 @@ def create_dataset(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     # Guardado en repo
-    repo.create(dataset_id, input_path=str(file_path), filename=file.filename)
+    repo.create(
+        dataset_id, 
+        input_path=str(file_path), 
+        filename=file.filename,
+        numerical_missing=numerical_missing,
+        categorical_missing=categorical_missing,
+        histogram_bins=histogram_bins
+    )
 
     # Lanzamos el worker
     process_dataset_async(dataset_id, repo)

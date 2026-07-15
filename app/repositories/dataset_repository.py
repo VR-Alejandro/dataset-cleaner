@@ -16,17 +16,33 @@ class DatasetRepository:
     def __init__(self):
         self._datasets = {}
 
-    def create(self, dataset_id: UUID, input_path: str = None, filename: str = None):
+    def create(
+            self, 
+            dataset_id: UUID, 
+            input_path: str = None, 
+            filename: str = None, 
+            numerical_missing: str = "mean", 
+            categorical_missing: str = "mode", 
+            histogram_bins: int = 10
+        ):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
             """
             INSERT INTO datasets (
-                id, filename, status, input_path, created_at
+                id, filename, status, input_path, created_at, numerical_missing, categorical_missing, histogram_bins
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (str(dataset_id), filename, "uploaded", str(input_path), datetime.now())
+            (str(dataset_id), 
+             filename, 
+             "uploaded", 
+             str(input_path), 
+             datetime.now(), 
+             numerical_missing, 
+             categorical_missing, 
+             histogram_bins
+            )
         )
         conn.commit()
         conn.close()
@@ -118,6 +134,9 @@ class DatasetRepository:
             id=row["id"],
             filename=row["filename"],
             status=row["status"],
+            numerical_missing=row["numerical_missing"] if row["numerical_missing"] else "mean",
+            categorical_missing=row["categorical_missing"] if row["categorical_missing"] else "mode",
+            histogram_bins=row["histogram_bins"] if row["histogram_bins"] else 10,
             input_path=Path(row["input_path"]) if row["input_path"] else None,
             cleaned_path=Path(row["cleaned_path"]) if row["cleaned_path"] else None,
             report_path=Path(row["report_path"]) if row["report_path"] else None,
