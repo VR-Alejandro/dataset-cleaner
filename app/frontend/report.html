@@ -1,3 +1,329 @@
-<h1>Reporte</h1>
-<canvas id="chart"></canvas>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        html, body {
+            background-color: #fbfbfb;
+            color: #212529;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .top-section {
+            padding: 3rem 4% 1rem 4%;
+            width: 100%;
+        }
+
+        .bottom-section {
+            padding: 1rem 10% 4rem 10%;
+            width: 100%;
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .glass-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.04);
+            padding: 1.5rem;
+            height: 100%;
+        }
+
+        /* --- NAVEGACIÓN SUPERIOR --- */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .back-btn:hover { color: #0f172a; }
+
+        /* --- KPIs (TARJETAS SUPERIORES) --- */
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+        .kpi-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .badge-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+        /* --- INSIGHTS --- */
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #475569;
+        }
+        .insight-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .insight-icon { color: #3b82f6; font-size: 1.1rem; }
+
+        /* --- EXPLORADOR DE VARIABLES --- */
+        .var-list-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .var-btn {
+            width: 100%;
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .var-btn:hover, .var-btn.active {
+            background: #ffffff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.08);
+        }
+        .var-type {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            float: right;
+            margin-top: 3px;
+        }
+        .type-num { color: #8b5cf6; }
+        .type-cat { color: #f59e0b; }
+
+        /* --- LIENZO GRÁFICOS --- */
+        .chart-placeholder {
+            width: 100%;
+            height: 350px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* --- AJUSTES DE ALTURA PARA EL BLOQUE INFERIOR --- */
+        .insights-scroll-container {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .heatmap-wrapper {
+            width: 100%;
+            height: 350px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        /* --- ESTILOS DEL MAPA DE CALOR --- */
+        .heatmap-grid {
+            display: grid;
+            width: 100%;
+            height: 100%;
+            gap: 4px;
+            padding: 10px;
+        }
+        
+        .heatmap-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: default;
+        }
+        
+        .heatmap-cell:hover {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        .heatmap-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==========================================
+     PARTE SUPERIOR - Cabecera y KPIs
+     ========================================== -->
+<div class="top-section">
+    
+    <!-- NAVEGACIÓN Y CABECERA -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <a href="index.html" class="back-btn mb-2">← Back to Workspace</a>
+            <h2 class="fw-bold mb-0">Reporting Area</h2>
+            <p class="text-muted mb-0" id="reportFilename">filename.csv</p>
+        </div>
+        <!-- BOTONES DE DESCARGA -->
+        <div class="d-flex gap-3">
+            <button id="btnDownloadJson" class="btn btn-outline-dark rounded-pill px-4 fw-semibold">Download JSON report</button>
+            <button id="btnDownloadCsv" class="btn btn-dark rounded-pill px-4 fw-semibold">Download clean dataset</button>
+        </div>
+    </div>
+
+    <!-- KPIs GENERALES -->
+    <div class="row g-4 mb-3">
+        <!-- Dimensiones -->
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="kpi-title">Shape (Rows × Cols)</div>
+                <div class="kpi-value d-flex align-items-end gap-2" id="kpiShape">
+                    <span>0 <span class="fs-5 text-muted">× 0</span></span>
+                </div>
+            </div>
+        </div>
+        <!-- Duplicados -->
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="kpi-title">Duplicate Rows</div>
+                <div class="kpi-value" id="kpiDuplicates">0</div>
+                <div class="mt-2 text-muted small">Removed during cleaning</div>
+            </div>
+        </div>
+        <!-- Valores nulos -->
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="kpi-title">Missing Values</div>
+                <div class="kpi-value" id="kpiMissing">0</div>
+                <div class="mt-2 text-muted small">Resolved successfully</div>
+            </div>
+        </div>
+        <!-- Configuración -->
+        <div class="col-md-3">
+            <div class="glass-card">
+                <div class="kpi-title">Cleaning Strategy</div>
+                <div class="mt-2">
+                    <span class="kpi-badge badge-green d-inline-block mb-1" id="kpiConfigNum">Num: Mean</span><br>
+                    <span class="kpi-badge badge-green d-inline-block" id="kpiConfigCat">Cat: Mode</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==========================================
+     PARTE INFERIOR - Gráficos e Insights 
+     ========================================== -->
+<div class="bottom-section">
+
+    <!-- EXPLORADOR E INSIGHTS -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Explorador de variables (Izquierda) -->
+        <div class="col-md-4">
+            <div class="glass-card">
+                <h6 class="fw-bold mb-3">Variables</h6>
+                <div class="var-list-container" id="variableList">
+                    <!-- Botones generados por JS irán aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Zona de gráficos -->
+        <div class="col-md-8">
+            <div class="glass-card d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0" id="chartTitle">Distribution: </h6>
+                    <div class="btn-group btn-group-sm">
+                        <!-- Botones para cambiar entre gráfico y stats -->
+                        <button id="btnViewChart" class="btn btn-outline-secondary active">Chart</button>
+                        <button id="btnViewStats" class="btn btn-outline-secondary">Stats</button>
+                    </div>
+                </div>
+                
+                <!-- Lienzo donde se inyectará Chart.js -->
+                <div class="flex-grow-1 position-relative" style="min-height: 300px;">
+                    <canvas id="distributionChart"></canvas>
+
+                    <div id="statsViewContainer" class="d-none w-100 h-100 overflow-y-auto bg-white p-2">
+                        <!-- Las tablas numéricas se inyectan aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSIGHTS y CORRELACIÓN -->
+    <div class="row g-4">
+        <!-- AI Insights -->
+        <div class="col-md-6">
+            <div class="glass-card d-flex flex-column" style="min-height: 410px;">
+                <h6 class="fw-bold mb-3">Automated Insights</h6>
+                <div class="insights-scroll-container flex-grow-1" id="insightsContainer">
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa de calor -->
+        <div class="col-md-6">
+            <div class="glass-card d-flex flex-column" style="min-height: 410px;">
+                <h6 class="fw-bold mb-3">Correlation Matrix (Numeric)</h6>
+                <!-- Lienzo para la matriz de correlación -->
+                <div class="flex-grow-1 position-relative">
+                    <div class="heatmap-wrapper" id="heatmapWrapper" style="width: 100%; height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <script src="report.js"></script>
+</body>
+</html>

@@ -353,7 +353,7 @@ async function deleteAllDatasets(e) {
 }
 
 function downloadDataset(id) { window.open(`${API_URL}/datasets/${id}/download`); }
-function goToReport(id) { window.location.href = `reporte.html?id=${id}`; }
+function goToReport(id) { window.location.href = `report.html?id=${id}`; }
 
 function renderDatasetCardTemplate(dataset, isAnimating) {
     const disabled = dataset.status !== "done" ? "disabled" : "";
