@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 
-def generate_statistics(df: pd.DataFrame):
+def generate_statistics(
+    df: pd.DataFrame,
+    histogram_groups: int,
+):
 
     stats = {
         "numeric": {},
@@ -13,7 +16,7 @@ def generate_statistics(df: pd.DataFrame):
         # numéricas
         if pd.api.types.is_numeric_dtype(df[col]):
 
-            hist_counts, hist_bins = np.histogram(df[col].dropna(), bins=10)
+            hist_counts, hist_bins = np.histogram(df[col].dropna(), bins= histogram_groups)
 
             stats["numeric"][col] = {
                 "mean": float(df[col].mean()),

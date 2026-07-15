@@ -28,7 +28,9 @@ def process_dataset(
     input_path: Path,
     output_directory: Path,
     config: dict[str, str] | None = None,
+    histogram_groups: int = 10,
 ) -> ProcessingResult:
+    
     """
     Runs the complete dataset processing pipeline.
 
@@ -81,7 +83,10 @@ def process_dataset(
     # Estadísticas
     # --------------------------------------------------------
 
-    stats = generate_statistics(df_clean)
+    stats = generate_statistics(
+        df_clean,
+        histogram_groups,
+    )
 
     report["basic_statistics"] = stats
 
