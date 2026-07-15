@@ -587,14 +587,41 @@
                 <input type="file" id="fileInput" class="d-none">
             </div>
             
-            <div class="mb-4 text-center">
-                <label class="form-label mb-2">Null treatment</label>
-                <select id="nullStrategy" class="form-select text-center form-select-sm">
-                    <option value="drop">Drop</option>
-                    <option value="mean">Mean</option>
-                    <option value="median">Median</option>
-                    <option value="mode">Mode</option>
-                </select>
+            <div class="mb-4 text-start">
+                
+                <!-- Tratamiento de nulos numéricos -->
+                <div class="mb-3">
+                    <label for="numNullTreatment" class="form-label text-secondary fw-bold mb-1" style="font-size: 0.8rem;">
+                        Numerical null treatment
+                    </label>
+                    <select id="numNullTreatment" name="numerical_null_treatment" class="form-select form-select-sm text-center">
+                        <option value="drop">Drop</option>
+                        <option value="mean" selected>Mean</option>
+                    </select>
+                </div>
+                
+                <!-- Tratamiento de nulos categóricos -->
+                <div class="mb-3">
+                    <label for="catNullTreatment" class="form-label text-secondary fw-bold mb-1" style="font-size: 0.8rem;">
+                        Categorical null treatment
+                    </label>
+                    <select id="catNullTreatment" name="categorical_null_treatment" class="form-select form-select-sm text-center">
+                        <option value="drop">Drop</option>
+                        <option value="mode" selected>Mode</option>
+                    </select>
+                </div>
+
+                <!-- Selector grupos histograma -->
+                <div>
+                    <label for="histogramBins" class="form-label text-secondary fw-bold mb-1" style="font-size: 0.8rem;">
+                        Histogram bins
+                    </label>
+                    <input type="number" id="histogramBins" name="histogram_bins" class="form-control form-control-sm text-center" value="10" min="5" max="50">
+                    <div class="form-text text-center mt-1" style="font-size: 0.7rem;">
+                        Number of groups (5 - 50)
+                    </div>
+                </div>
+
             </div>
 
             <button id="uploadBtn" class="btn btn-dark w-100 rounded-pill py-2 fw-semibold">

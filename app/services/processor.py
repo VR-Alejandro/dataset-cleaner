@@ -22,10 +22,21 @@ def _process_dataset(dataset_id, repo):
     input_path = Path(dataset.input_path) 
     output_dir = Path("outputs") / str(dataset_id)
 
+    # Definimos el diccionario que enviaremos a la pipeline
+    user_config = {
+        "numeric_missing": dataset.numerical_missing,
+        "categorical_missing": dataset.categorical_missing
+    }
+
+    # Número de grupos a graficar en histogramas
+    n_groups = dataset.histogram_bins
+
     try:
         result = process_dataset(
             input_path=input_path,
             output_directory=output_dir,
+            config=user_config,
+            histogram_groups=n_groups
         )
 
         # Guardamos los resultados

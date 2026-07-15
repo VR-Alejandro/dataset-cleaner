@@ -4,8 +4,8 @@ from processing.exceptions import CleaningError
 
 logger = logging.getLogger(__name__)
 
-VALID_NUMERIC_STRATEGIES = {"keep", "drop", "mean"}
-VALID_CATEGORICAL_STRATEGIES = {"keep", "drop", "mode"}
+VALID_NUMERIC_STRATEGIES = {"drop", "mean"}
+VALID_CATEGORICAL_STRATEGIES = {"drop", "mode"}
 
 
 def clean_dataset(df, config):
@@ -27,8 +27,8 @@ def clean_dataset(df, config):
     numeric_cols = df_clean.select_dtypes(include="number").columns
     categorical_cols = df_clean.select_dtypes(include="object").columns
 
-    numeric_strategy = config.get("numeric_missing", "keep")
-    categorical_strategy = config.get("categorical_missing", "keep")
+    numeric_strategy = config.get("numeric_missing", "drop")
+    categorical_strategy = config.get("categorical_missing", "drop")
 
     # Validación de estrategias
     if numeric_strategy not in VALID_NUMERIC_STRATEGIES:
