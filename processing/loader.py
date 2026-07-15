@@ -12,7 +12,24 @@ def load_dataset(path: str):
     try:
 
         if extension == ".csv":
-            df = pd.read_csv(path)
+             
+            encodings = [
+                "utf-8",
+                "utf-8-sig",
+                "latin1",
+                "cp1252",
+            ]
+
+            for encoding in encodings:
+                try:
+                    df = pd.read_csv(path, encoding=encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                raise DatasetLoadError(
+                    "Unable to read CSV. Unsupported file encoding."
+                )
 
         elif extension in [".xlsx", ".xls"]:
             df = pd.read_excel(path)
