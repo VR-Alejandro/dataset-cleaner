@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Response, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, UploadFile, File, Response, status
 from fastapi.responses import FileResponse
 from app.schemas.dataset import DatasetResponse, DatasetStatus
 
@@ -60,7 +60,7 @@ def create_dataset(file: UploadFile = File(...)):
 
 
 @router.delete("/datasets/{id}")
-def delete_dataset(id: UUID):
+def delete_dataset(id: UUID, background_tasks: BackgroundTasks):
     dataset = repo.get(id)
 
     if not dataset:
@@ -74,9 +74,22 @@ def delete_dataset(id: UUID):
         # status = done, processing o failed.
         repo.delete(id)
 
+        # Eliminamos los ficheros asociados al dataset
+        background_tasks.add_task(
+            repo.cleanup_dataset_directories,
+            id
+        )
+
+
+
 @router.delete("/all_datasets")
-def delete_all_datasets():
+def delete_all_datasets(background_tasks: BackgroundTasks):
     repo.delete_all()
+
+    # Eliminamos los ficheros asociados a los datasets
+    background_tasks.add_task(
+        repo.cleanup_all_artifacts
+    )
 
 
 @router.get("/datasets")
