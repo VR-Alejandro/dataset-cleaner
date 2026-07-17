@@ -457,32 +457,32 @@ function renderStats(varName, type, data) {
             <div class="animate-fade-in">
                 <table class="table table-hover align-middle mb-0" style="font-size: 0.95rem;">
                     <tbody>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Mean</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.mean !== undefined ? stats.mean.toFixed(4) : 'N/A'}</td>
                         </tr>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Median / Q2</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.median !== undefined ? stats.median.toFixed(4) : 'N/A'}</td>
                         </tr>
                         <!-- 🌟 NUEVO: Cuartiles extraídos del nuevo JSON -->
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Q1</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.quartiles ? stats.quartiles.q1.toFixed(4) : 'N/A'}</td>
                         </tr>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Q3</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.quartiles ? stats.quartiles.q3.toFixed(4) : 'N/A'}</td>
                         </tr>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Standard deviation (Std)</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.std !== undefined ? stats.std.toFixed(4) : 'N/A'}</td>
                         </tr>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Min. value</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.min !== undefined ? stats.min.toFixed(4) : 'N/A'}</td>
                         </tr>
-                        <tr style="border-color: #f1f5f9;">
+                        <tr style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Max. value</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.max !== undefined ? stats.max.toFixed(4) : 'N/A'}</td>
                         </tr>
@@ -496,11 +496,11 @@ function renderStats(varName, type, data) {
             <div class="animate-fade-in">
                 <table class="table table-hover align-middle mb-0" style="font-size: 0.95rem;">
                     <tbody>
-                        <tr class="border-bottom" style="border-color: #f1f5f9;">
+                        <tr class="border-bottom" style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Unique Values</td>
                             <td class="text-end py-3 fw-bold text-dark">${stats.unique_values !== undefined ? stats.unique_values : 'N/A'}</td>
                         </tr>
-                        <tr style="border-color: #f1f5f9;">
+                        <tr style="border-color: rgba(255, 255, 255, 0.6);">
                             <td class="text-muted py-3 fw-semibold">Top Value</td>
                             <td class="text-end py-3 fw-bold text-dark text-truncate" style="max-width: 250px;" title="${stats.top_value}">
                                 ${stats.top_value !== undefined ? stats.top_value : 'N/A'}
@@ -516,24 +516,24 @@ function renderStats(varName, type, data) {
 }
 
 function isIdVariable(name) {
-    const lower = name.toLowerCase().trim();
-    
-    // Coincidencia exacta
-    if (lower === 'id') return true;
-    
-    // Formato snake_case o kebab-case
-    if (lower.startsWith('id_') || lower.endsWith('_id') || lower.includes('_id_') ||
-        lower.startsWith('id-') || lower.endsWith('-id') || lower.includes('-id-')) {
-        return true;
-    }
-    
-    // 3. Formato camelCase o PascalCase
-    const camelCaseIdRegex = /(?:^|[a-z0-9])Id(?:[A-Z]|$)/;
-    const camelCaseIDRegex = /(?:^|[a-z0-9])ID(?:[A-Z]|$)/;
-    
-    if (camelCaseIdRegex.test(name) || camelCaseIDRegex.test(name)) {
-        return true;
-    }
+    if (!name || typeof name !== 'string') return false;
+
+    // 1. Normalización
+    const normalized = name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ') // cualquier separador → espacio
+        .replace(/\s+/g, ' ');
+
+    // 2. Tokenización
+    const tokens = normalized.split(' ');
+
+    // 3. Regla semántica principal
+    if (tokens.includes('id')) return true;
+
+    // 4. Fallback camelCase / PascalCase
+    const camelCaseRegex = /(?:^|[a-z0-9])(id)(?:[A-Z]|$)/i;
+    if (camelCaseRegex.test(name)) return true;
 
     return false;
 }
