@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from app.api.routes import router
 from app.core.db import init_db
@@ -45,6 +46,26 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+# --- Configuramos la app para desactivar el almacenamiento en caché ---
+@app.middleware("http")
+async def add_no_cache_headers(request: Request, call_next):
+    response = await call_next(request)
+    
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    
+    return response
+
+# --- Configuramos la ruta principal para que muestre el frontend --- 
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+@app.get("/")
+async def serve_home():
+    return FileResponse(FRONTEND_DIR / "index.html")
+
+
 app.include_router(router)
 
 app.add_middleware(
@@ -105,3 +126,6 @@ async def report_generation_exception_handler(request: Request, exc: ReportGener
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": str(exc)},
     )
+
+# Montamos el directorio del frontend
+app.mount("/", StaticFiles(directory=FRONTEND_DIR), name="frontend")
