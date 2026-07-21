@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = "http://localhost:5500";
 
 // Extraer el ID del dataset de la URL
 const urlParams = new URLSearchParams(window.location.search);

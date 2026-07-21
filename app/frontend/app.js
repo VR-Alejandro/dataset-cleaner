@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000";
+const API_URL = "http://localhost:5500";
 
 let currentPage = 1;
 const ITEMS_PER_PAGE = 5;
