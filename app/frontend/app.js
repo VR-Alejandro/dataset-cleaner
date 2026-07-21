@@ -395,9 +395,9 @@ function renderDatasetCardTemplate(dataset, isAnimating) {
     }
 
     return `
-    <div class="glass-card p-3 d-flex align-items-center justify-content-between" style="background-color: #ffffff; border-color: #e2e8f0;">
+    <div class="glass-card p-3 d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-4 flex-grow-1">
-            <div class="mac-preview-box">
+            <div class="mac-preview-box" style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(4px);">
                 <table class="mini-sheet">
                     <tr><td><div class="mini-data-line"></div></td><td><div class="mini-data-line"></div></td></tr>
                     <tr><td><div class="mini-data-line"></div></td><td><div class="mini-data-line"></div></td></tr>
@@ -418,7 +418,7 @@ function renderDatasetCardTemplate(dataset, isAnimating) {
                         ${finalText}
                     </span>
                 </div>
-                <div class="progress progress-thin">
+                <div class="progress progress-thin" style="background-color: rgba(203, 213, 225, 0.4);">
                     <div class="progress-bar ${barClass}" style="${isAnimating ? inlineStyle : ''}"></div>
                 </div>
             </div>
