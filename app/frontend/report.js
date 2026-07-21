@@ -151,6 +151,7 @@ function renderVariables(data) {
     // Iterar sobre numéricas
     if (data.basic_statistics.numeric) {
         Object.keys(data.basic_statistics.numeric).forEach(varName => {
+            if (isIdVariable(varName)) return;
             createButton(varName, 'num');
         });
     }
@@ -158,6 +159,7 @@ function renderVariables(data) {
     // Iterar sobre categóricas
     if (data.basic_statistics.categorical) {
         Object.keys(data.basic_statistics.categorical).forEach(varName => {
+            if (isIdVariable(varName)) return;
             createButton(varName, 'cat');
         });
     }
@@ -168,8 +170,42 @@ function renderInsights(data) {
     const insightsContainer = document.getElementById("insightsContainer");
     insightsContainer.innerHTML = ""; // Limpiar estado previo estático
     
-    if (data.insights && data.insights.length > 0) {
-        data.insights.forEach(insightText => {
+    const insights = data.insights || [];
+
+    // Obtenemos todas las columnas que clasifican como IDs
+    const idColumns = [];
+    if (data.basic_statistics?.numeric) {
+        Object.keys(data.basic_statistics.numeric).forEach(col => {
+            if (isIdVariable(col)) idColumns.push(col);
+        });
+    }
+    if (data.basic_statistics?.categorical) {
+        Object.keys(data.basic_statistics.categorical).forEach(col => {
+            if (isIdVariable(col)) idColumns.push(col);
+        });
+    }
+
+    // Filtramos los insights que hagan mención a columnas de tipo ID
+    const filteredInsights = insights.filter(insightText => {
+        const mentionsId = idColumns.some(idCol => {
+            // Coincidencia si viene entre comillas...
+            if (insightText.includes(`'${idCol}'`) || insightText.includes(`"${idCol}"`)) {
+                return true;
+            }
+            
+            // Coincidencia por palabra exacta...
+            const escapedCol = idCol.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const wordBoundaryRegex = new RegExp(`\\b${escapedCol}\\b`, 'i');
+            
+            return wordBoundaryRegex.test(insightText);
+        });
+
+        // Solo nos quedamos con el insight si NO menciona ningún ID
+        return !mentionsId;
+    });
+
+    if (filteredInsights.length > 0) {
+        filteredInsights.forEach(insightText => {
             const item = document.createElement("div");
             item.className = "insight-item";
             item.innerHTML = `
@@ -304,8 +340,8 @@ function renderHeatmap(data) {
         return;
     }
 
-    // Las variables son las claves del diccionario principal
-    const variables = Object.keys(corrMatrixData);
+    // Variables a incluir (filtrando variables identificadoras)
+    const variables = Object.keys(corrMatrixData).filter(v => !isIdVariable(v));
 
     if (variables.length === 0) {
         wrapper.innerHTML = '<div class="text-muted text-center mt-5">No numeric variables available for correlation.</div>';
@@ -477,4 +513,27 @@ function renderStats(varName, type, data) {
     }
 
     container.innerHTML = htmlContent;
+}
+
+function isIdVariable(name) {
+    const lower = name.toLowerCase().trim();
+    
+    // Coincidencia exacta
+    if (lower === 'id') return true;
+    
+    // Formato snake_case o kebab-case
+    if (lower.startsWith('id_') || lower.endsWith('_id') || lower.includes('_id_') ||
+        lower.startsWith('id-') || lower.endsWith('-id') || lower.includes('-id-')) {
+        return true;
+    }
+    
+    // 3. Formato camelCase o PascalCase
+    const camelCaseIdRegex = /(?:^|[a-z0-9])Id(?:[A-Z]|$)/;
+    const camelCaseIDRegex = /(?:^|[a-z0-9])ID(?:[A-Z]|$)/;
+    
+    if (camelCaseIdRegex.test(name) || camelCaseIDRegex.test(name)) {
+        return true;
+    }
+
+    return false;
 }
